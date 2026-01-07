@@ -1,0 +1,161 @@
+/* ===============================
+   AVC Choir Global Theme
+   Colors based on logo (white + brown) + heavenly angelic theme
+   =============================== */
+
+:root {
+  /* Logo colors */
+  --avc-brown: #8B5E3C;    /* main logo brown */
+  --avc-white: #FFFFFF;     /* main logo white */
+
+  /* Heavenly / angelic theme */
+  --angelic-blue: #E3F2FD;     /* soft sky blue background */
+  --angelic-gold: #FFD700;     /* soft gold accents */
+  --angelic-lavender: #EDE7F6; /* gentle lavender highlights */
+  --angelic-cream: #FFF8E7;    /* soft cream page background */
+
+  /* Text colors */
+  --text-dark-brown: #5D3A1A;
+  --text-light: #FFFFFF;
+  --text-muted: #6c757d;
+
+  /* Shadows / subtle accents */
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+}
+
+/* ===============================
+   Bootstrap Overrides
+   =============================== */
+
+/* Navbar */
+.navbar {
+  background-color: var(--avc-brown) !important;
+  color: var(--text-light) !important;
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link {
+  color: var(--text-light) !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+  background-color: var(--angelic-gold) !important;
+  color: var(--avc-brown) !important;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--angelic-blue);
+  color: var(--avc-brown);
+  border: 1px solid var(--avc-brown);
+}
+
+.btn-primary:hover {
+  background-color: var(--angelic-gold);
+  color: var(--avc-white);
+  border-color: var(--avc-brown);
+}
+
+.btn-secondary {
+  background-color: var(--angelic-lavender);
+  color: var(--avc-brown);
+  border: 1px solid var(--avc-brown);
+}
+
+.btn-secondary:hover {
+  background-color: var(--avc-brown);
+  color: var(--avc-white);
+}
+
+/* Backgrounds */
+.bg-page {
+  background-color: var(--angelic-cream) !important;
+}
+
+.bg-card {
+  background-color: var(--avc-white);
+  box-shadow: 0 4px 15px var(--shadow-light);
+  border-radius: 0.75rem;
+}
+
+/* Cards */
+.card {
+  background-color: var(--avc-white);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 15px var(--shadow-light);
+}
+
+/* Forms */
+.form-control {
+  border: 1px solid var(--avc-brown);
+  border-radius: 0.5rem;
+}
+
+.form-control:focus {
+  border-color: var(--angelic-blue);
+  box-shadow: 0 0 0 0.2rem rgba(227, 242, 253, 0.5);
+}
+
+/* Alerts */
+.alert-primary {
+  background-color: var(--angelic-blue);
+  color: var(--avc-brown);
+  border: 1px solid var(--avc-brown);
+}
+
+.alert-success {
+  background-color: #D4EDDA;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #F8D7DA;
+  color: #721C24;
+}
+
+/* Links */
+a {
+  color: var(--avc-brown);
+}
+
+a:hover {
+  color: var(--angelic-gold);
+  text-decoration: underline;
+}
+
+/* Footer */
+footer {
+  background-color: var(--avc-brown);
+  color: var(--text-light);
+}
+
+/* Tables */
+.table {
+  border-color: var(--avc-brown);
+}
+
+.table th {
+  background-color: var(--angelic-blue);
+  color: var(--avc-brown);
+}
+
+.table td {
+  background-color: var(--avc-white);
+}
+
+/* Utility helper */
+.text-brown { color: var(--avc-brown) !important; }
+.text-gold { color: var(--angelic-gold) !important; }
+.bg-brown { background-color: var(--avc-brown) !important; }
+.bg-gold { background-color: var(--angelic-gold) !important; }
+
+.main-content {
+  padding-top: 80px; /* full navbar */
+}
+
+.main-content.auth-page {
+  padding-top: 50px; /* smaller topbar height */
+}
+
