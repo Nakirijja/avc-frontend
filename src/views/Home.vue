@@ -1,4 +1,3 @@
-<!-- src/views/Home.vue -->
 <template>
   <div class="home-page">
 
@@ -192,32 +191,77 @@
           <p class="section-subtitle">Join us for our next musical celebrations</p>
         </div>
 
-        <div class="row g-4">
-          <div class="col-lg-4 col-md-6" v-for="event in upcomingEvents" :key="event.id">
+        <!-- Loading State -->
+        <div v-if="eventsLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading events...</span>
+          </div>
+          <p class="mt-3 text-muted">Loading upcoming events...</p>
+        </div>
+
+        <!-- Error State -->
+        <div v-else-if="eventsError" class="alert alert-warning text-center">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Unable to load events</strong>
+          <p class="mb-0">Please check your connection and try again.</p>
+          <button @click="fetchUpcomingEvents" class="btn btn-sm btn-warning mt-2">
+            <i class="fas fa-redo me-1"></i> Retry
+          </button>
+        </div>
+
+        <!-- Events Grid -->
+        <div v-else-if="upcomingEvents.length > 0" class="row g-4">
+          <div class="col-lg-4 col-md-6" v-for="event in upcomingEvents.slice(0, 3)" :key="event.id">
             <div class="event-card">
-              <div class="event-date">
-                <div class="date-day">{{ event.date.split(' ')[0] }}</div>
-                <div class="date-month">{{ event.date.split(' ')[1] }}</div>
+              <div class="event-date" :style="getEventDateStyle(event.date)">
+                <div class="date-day">{{ formatDateDay(event.date) }}</div>
+                <div class="date-month">{{ formatDateMonth(event.date) }}</div>
               </div>
               <div class="event-content">
                 <h3 class="event-title">{{ event.title }}</h3>
                 <p class="event-location"><i class="fas fa-map-marker-alt me-2"></i>{{ event.location }}</p>
-                <p class="event-time"><i class="fas fa-clock me-2"></i>{{ event.time }}</p>
-                <p class="event-description">{{ event.description }}</p>
+                <p class="event-time"><i class="fas fa-clock me-2"></i>{{ formatEventTime(event) }}</p>
+                <p class="event-description">{{ truncateText(event.description, 100) }}</p>
                 <div class="event-actions">
-                  <button class="btn btn-outline-primary btn-sm" @click="rsvpToEvent(event)">
-                    <i class="fas fa-calendar-plus me-2"></i>RSVP
+                  <button 
+                    class="btn btn-outline-primary btn-sm" 
+                    @click="rsvpToEvent(event)"
+                  >
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    RSVP
                   </button>
                   <router-link :to="`/events/${event.id}`" class="btn btn-link btn-sm">
                     Learn More
                   </router-link>
+                </div>
+                
+                <!-- Event Status Badges -->
+                <div class="event-status mt-2" v-if="showEventStatus(event)">
+                  <span v-if="event.is_full" class="badge bg-danger me-2">
+                    <i class="fas fa-user-slash me-1"></i>Full
+                  </span>
+                  <span v-if="event.is_featured" class="badge bg-warning text-dark me-2">
+                    <i class="fas fa-star me-1"></i>Featured
+                  </span>
+                  <span v-if="event.remaining_spots > 0" class="badge bg-info">
+                    <i class="fas fa-users me-1"></i>{{ event.remaining_spots }} spots left
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="text-center mt-5">
+        <!-- No Events State -->
+        <div v-else-if="!eventsLoading && upcomingEvents.length === 0" class="text-center py-5">
+          <div class="empty-state">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No upcoming events</h4>
+            <p class="text-muted mb-3">Check back soon for our next events!</p>
+          </div>
+        </div>
+
+        <div v-if="!eventsLoading && upcomingEvents.length > 0" class="text-center mt-5">
           <router-link to="/events" class="btn btn-primary btn-lg">
             View All Events <i class="fas fa-arrow-right ms-2"></i>
           </router-link>
@@ -285,6 +329,7 @@ import Navbar from '@/components/common/Navbar.vue'
 import Footer from '@/components/common/Footer.vue'
 import LeadershipCard from '@/components/common/LeadershipCard.vue'
 import TestimonialsCarousel from '@/components/common/TestimonialsCarousel.vue'
+import { apiService } from '@/services/api'
 
 export default {
   name: 'HomeView',
@@ -302,15 +347,6 @@ export default {
       '/images/avc/hero-1.jpg',
     ])
     const currentSlide = ref(0)
-
-    onMounted(() => {
-      const interval = setInterval(() => {
-        currentSlide.value = (currentSlide.value + 1) % heroImages.value.length
-    }, 5000)
-
-    onUnmounted(() => clearInterval(interval))
-  })
-      
 
     // Features data
     const features = ref([
@@ -389,32 +425,9 @@ export default {
     ])
 
     // Upcoming events data
-    const upcomingEvents = ref([
-      {
-        id: 1,
-        title: '20th Anniversy',
-        date: '21 Dec',
-        location: 'St. Gyaviira Main Church',
-        time: '8:30 PM - 1:00 PM',
-        description: 'Celebration of twenty years of service .'
-      },
-      {
-        id: 2,
-        title: 'Voice Workshop',
-        date: '22 Jan',
-        location: 'Choir Practice Hall',
-        time: '10:00 AM - 2:00 PM',
-        description: 'Special workshop focusing on vocal techniques and harmony development.'
-      },
-      {
-        id: 3,
-        title: 'Community Outreach',
-        date: '5 Feb',
-        location: 'Local Community Center',
-        time: '3:00 PM - 5:00 PM',
-        description: 'Bringing music to the community with uplifting performances and interactions.'
-      }
-    ])
+    const upcomingEvents = ref([])
+    const eventsLoading = ref(false)
+    const eventsError = ref(false)
 
     // Leadership team data
     const leadershipTeam = ref([
@@ -469,7 +482,186 @@ export default {
       }
     ])
 
-    // Methods
+    // Slideshow interval reference
+    let slideshowInterval = null
+
+    // Method to fetch events from database
+    const fetchUpcomingEvents = async () => {
+      eventsLoading.value = true
+      eventsError.value = false
+
+      try {
+        const params = {
+          upcoming: true,
+          limit: 6,
+          ordering: 'date'
+        }
+
+        // Try to fetch from API
+        const response = await apiService.events.getUpcomingEvents(params)
+        console.log('Fetched events from API:', response.data)
+        
+        // Handle different response formats
+        if (response.data && response.data.results) {
+          upcomingEvents.value = response.data.results
+        } else if (response.data && Array.isArray(response.data)) {
+          upcomingEvents.value = response.data
+        } else {
+          // If API returns unexpected format, use fallback
+          upcomingEvents.value = getFallbackEvents()
+        }
+        
+        // Filter to only show future events
+        upcomingEvents.value = upcomingEvents.value.filter(event => {
+          if (!event.date) return false
+          try {
+            const eventDate = new Date(event.date)
+            return eventDate >= new Date()
+          } catch {
+            return false
+          }
+        }).slice(0, 3) // Show only first 3 events on homepage
+        
+      } catch (err) {
+        console.error('Error fetching events from API:', err)
+        eventsError.value = true
+        // Fallback to sample events if API fails
+        upcomingEvents.value = getFallbackEvents()
+      } finally {
+        eventsLoading.value = false
+      }
+    }
+
+    // Helper methods for date formatting
+    const formatDateDay = (dateString) => {
+      if (!dateString) return '00'
+      try {
+        const date = new Date(dateString)
+        return date.getDate().toString().padStart(2, '0')
+      } catch {
+        return '00'
+      }
+    }
+
+    const formatDateMonth = (dateString) => {
+      if (!dateString) return 'Jan'
+      try {
+        const date = new Date(dateString)
+        return date.toLocaleString('en-US', { month: 'short' })
+      } catch {
+        return 'Jan'
+      }
+    }
+
+    const formatEventTime = (event) => {
+      if (event.start_time && event.end_time) {
+        return `${formatTime(event.start_time)} - ${formatTime(event.end_time)}`
+      } else if (event.time) {
+        return event.time
+      } else if (event.start_date) {
+        try {
+          const date = new Date(event.start_date)
+          return date.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })
+        } catch {
+          return 'Time to be announced'
+        }
+      }
+      return 'Time to be announced'
+    }
+
+    const formatTime = (timeString) => {
+      if (!timeString) return ''
+      try {
+        const [hours, minutes] = timeString.split(':')
+        const hour = parseInt(hours)
+        const ampm = hour >= 12 ? 'PM' : 'AM'
+        const hour12 = hour % 12 || 12
+        return `${hour12}:${minutes} ${ampm}`
+      } catch {
+        return timeString
+      }
+    }
+
+    const getEventDateStyle = (dateString) => {
+      if (!dateString) {
+        return { background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))' }
+      }
+      
+      try {
+        const date = new Date(dateString)
+        const today = new Date()
+        const tomorrow = new Date(today)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        
+        if (date.toDateString() === today.toDateString()) {
+          return { background: 'linear-gradient(135deg, #f59e0b, #d97706)' } // Today - orange
+        } else if (date.toDateString() === tomorrow.toDateString()) {
+          return { background: 'linear-gradient(135deg, #10b981, #059669)' } // Tomorrow - green
+        }
+        return { background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))' }
+      } catch {
+        return { background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))' }
+      }
+    }
+
+    const truncateText = (text, length) => {
+      if (!text) return 'No description available'
+      return text.length > length ? text.substring(0, length) + '...' : text
+    }
+
+    const showEventStatus = (event) => {
+      return event.is_full || event.is_featured || (event.remaining_spots > 0)
+    }
+
+    // RSVP function
+    const rsvpToEvent = (event) => {
+      console.log('RSVP to event:', event.title)
+      // Simple alert for now - can be enhanced later
+      alert(`RSVP functionality for "${event.title}" will be available soon!\n\nYou'll be able to reserve your spot for this event.`)
+    }
+
+    // Fallback events if API fails
+    const getFallbackEvents = () => {
+      return [
+        {
+          id: 1,
+          title: '20th Anniversary Concert',
+          date: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+          location: 'St. Gyaviira Main Church',
+          start_time: '18:30:00',
+          end_time: '22:00:00',
+          description: 'Celebration of twenty years of service with special performances.',
+          is_featured: true,
+          remaining_spots: 15
+        },
+        {
+          id: 2,
+          title: 'Voice Workshop',
+          date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
+          location: 'Choir Practice Hall',
+          start_time: '10:00:00',
+          end_time: '14:00:00',
+          description: 'Special workshop focusing on vocal techniques and harmony development.',
+          remaining_spots: 8
+        },
+        {
+          id: 3,
+          title: 'Community Outreach',
+          date: new Date(new Date().setDate(new Date().getDate() + 21)).toISOString(),
+          location: 'Local Community Center',
+          start_time: '15:00:00',
+          end_time: '17:00:00',
+          description: 'Bringing music to the community with uplifting performances.',
+          is_full: false,
+          remaining_spots: 20
+        }
+      ]
+    }
+
+    // Scroll to section
     const scrollToSection = (sectionId) => {
       const element = document.getElementById(sectionId)
       if (element) {
@@ -480,15 +672,8 @@ export default {
       }
     }
 
-    const rsvpToEvent = (event) => {
-      // Implement RSVP functionality
-      console.log('RSVP to event:', event.title)
-      // Show success message or redirect to RSVP page
-    }
-
     const handleSocialClick = (data) => {
       console.log('Social click:', data)
-      // Track social interactions if needed
     }
 
     // Animation observers
@@ -507,33 +692,62 @@ export default {
       }, observerOptions)
 
       // Observe all feature cards and section cards
-      document.querySelectorAll('.feature-card, .section-card, .event-card').forEach(card => {
-        observer.observe(card)
-      })
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.feature-card, .section-card, .event-card')
+        cards.forEach(card => {
+          observer.observe(card)
+        })
+      }, 100)
 
       return observer
     }
 
-    // Lifecycle
+    // Lifecycle hooks
     onMounted(() => {
       console.log('AVC Choir Homepage loaded')
+      
+      // Start hero image slideshow
+      slideshowInterval = setInterval(() => {
+        currentSlide.value = (currentSlide.value + 1) % heroImages.value.length
+      }, 5000)
+      
+      // Setup animations
       const observer = setupAnimations()
+      
+      // Fetch events from database
+      fetchUpcomingEvents()
 
-      // Cleanup
+      // Cleanup function
       onUnmounted(() => {
+        // Clear slideshow interval
+        if (slideshowInterval) {
+          clearInterval(slideshowInterval)
+        }
+        
+        // Disconnect observer
         observer.disconnect()
       })
     })
 
+    // Return all reactive data and methods
     return {
       heroImages,
       currentSlide,
       features,
       voiceSections,
       upcomingEvents,
+      eventsLoading,
+      eventsError,
       leadershipTeam,
-      scrollToSection,
+      fetchUpcomingEvents,
+      formatDateDay,
+      formatDateMonth,
+      formatEventTime,
+      getEventDateStyle,
+      truncateText,
+      showEventStatus,
       rsvpToEvent,
+      scrollToSection,
       handleSocialClick
     }
   }
@@ -610,7 +824,6 @@ export default {
   opacity: 1;
 }
 
-/* Optional overlay to improve readability */
 .hero-bg-overlay {
   position: absolute;
   top: 0;
@@ -1143,6 +1356,46 @@ export default {
   align-items: center;
 }
 
+/* Event Status Badges */
+.event-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.event-status .badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 50px;
+}
+
+/* Loading spinner */
+.spinner-border.text-primary {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Empty state */
+.empty-state {
+  padding: 3rem 1rem;
+}
+
+.empty-state i {
+  opacity: 0.5;
+}
+
+/* Event card date for today/tomorrow */
+.event-card .event-date {
+  transition: all 0.3s ease;
+}
+
+/* Disabled button state */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ===== Join CTA Section ===== */
 .join-section {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -1328,6 +1581,10 @@ export default {
     gap: 1rem;
     min-width: auto;
     padding: 1rem;
+  }
+  
+  .event-status {
+    justify-content: center;
   }
 }
 

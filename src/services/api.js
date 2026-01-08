@@ -57,9 +57,8 @@ apiClient.interceptors.response.use(
   }
 )
 
-// -----------------------------
 // Auth helper
-// -----------------------------
+
 export const authHelper = {
   getCurrentUser() {
     const userData = localStorage.getItem('user_data')
@@ -80,9 +79,8 @@ export const authHelper = {
   },
 }
 
-// -----------------------------
 // API Service
-// -----------------------------
+
 export const apiService = {
   auth: {
     login: data => apiClient.post('/users/login/', data),
@@ -169,6 +167,20 @@ events: {
   createEvent: (data) => apiClient.post('/events/', data),
   updateEvent: (id, data) => apiClient.patch(`/events/${id}/`, data),
   deleteEvent: (id) => apiClient.delete(`/events/${id}/`),
+  //Get upcoming events
+  getUpcomingEvents: (params = {}) => {
+    return apiClient.get('/events/upcoming/', { params })
+  },
+
+  //RSVP to an event
+  rsvpToEvent: (eventId, data) => {
+    return apiClient.post('/events/${eventId}/rsvp/', data)
+  },
+
+  //Get event details
+  getEvent: (eventId) => {
+    return apiClient.get('/events/${eventId}/')
+  }
 },
 
 shop: {
