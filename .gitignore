@@ -7,24 +7,127 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+
+# Local development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build directories
+dist/
+dist-ssr/
+build/
+.rollup.cache/
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# IDEs and editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Editor config
+.editorconfig
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Windows thumbnail cache files
+*.db
+
+# System files
+.temp/
+.cache/
+tmp/
+temp/
+
+# Cypress
 /cypress/videos/
 /cypress/screenshots/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Storybook
+storybook-static/
 
+# TypeScript
 *.tsbuildinfo
+
+# Vite
+*.local
+.history/
+
+# Debug files from IDEs
+*.debug
+
+# Custom (add your project-specific files here)
+# /uploads/
+# /media/
+# /backups/
+
+# Your specific project files
+src/.env                    # If you had env files in src/
+src/.env.*
+public/uploads/            # If you have upload functionality
+*.mp4                      # Large video files (like tungamira.mp4)
+*.zip
+*.rar
+*.tar.gz
+
+# Development/testing databases
+*.sqlite
+*.sqlite3
+test.db
+
+# Package manager specific
+package-lock.json          # Only if using yarn
+yarn.lock                  # Only if using npm
+pnpm-lock.yaml
+
+# Vue CLI legacy
+.vuepress/dist
+.temp
+.cache

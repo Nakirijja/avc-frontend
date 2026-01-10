@@ -150,7 +150,8 @@
                       id="mtn"
                     >
                     <label class="form-check-label d-flex align-items-center" for="mtn">
-                      <img src="/api/placeholder/40/25?text=MTN" alt="MTN" class="me-2">
+                      <!-- Fixed: Replaced /api/placeholder with colored badge -->
+                      <span class="payment-badge mtn-badge me-2">MTN</span>
                       MTN Mobile Money
                     </label>
                   </div>
@@ -164,7 +165,8 @@
                       id="airtel"
                     >
                     <label class="form-check-label d-flex align-items-center" for="airtel">
-                      <img src="/api/placeholder/40/25?text=Airtel" alt="Airtel" class="me-2">
+                      <!-- Fixed: Replaced /api/placeholder with colored badge -->
+                      <span class="payment-badge airtel-badge me-2">Airtel</span>
                       Airtel Money
                     </label>
                   </div>
@@ -256,10 +258,12 @@
             <div class="card-body">
               <!-- Order Items -->
               <div v-for="item in cart" :key="item.id" class="order-item d-flex mb-3 pb-3 border-bottom">
+                <!-- Fixed: Using fallback image instead of localhost URL -->
                 <img 
                   :src="getProductImage(item.image)" 
                   :alt="item.name"
                   class="order-item-image me-3"
+                  @error="handleImageError"
                 >
                 <div class="flex-grow-1">
                   <h6 class="mb-1">{{ item.name }}</h6>
@@ -395,10 +399,17 @@ export default {
   },
   methods: {
     getProductImage(imageUrl) {
+      // Fixed: Remove localhost reference for production build
       if (imageUrl) {
-        return imageUrl.startsWith('http') ? imageUrl : `http://localhost:8000${imageUrl}`
+        // Use environment variable for API base URL or fallback
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+        return imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}`
       }
       return 'https://via.placeholder.com/60x60?text=Product'
+    },
+    handleImageError(event) {
+      // Fallback if image fails to load
+      event.target.src = 'https://via.placeholder.com/60x60?text=Product'
     },
     formatPrice(price) {
       return parseFloat(price).toLocaleString('en-US')
@@ -417,7 +428,8 @@ export default {
       this.processing = true
       
       try {
-        // Simulate API call to process order
+        // In production, this would call your API
+        // For now, simulate API call
         await new Promise(resolve => setTimeout(resolve, 3000))
         
         // Create order object
@@ -432,7 +444,7 @@ export default {
           timestamp: new Date().toISOString()
         }
         
-        // Save order to localStorage
+        // Save order to localStorage (in production, send to API)
         this.saveOrder(order)
         
         // Clear cart
@@ -478,8 +490,8 @@ export default {
       this.$router.push('/shop')
     }
     
-    // Pre-fill demo data for testing
-    if (process.env.NODE_ENV === 'development') {
+    // Pre-fill demo data for testing (only in development)
+    if (import.meta.env.DEV) {
       this.customerInfo = {
         firstName: 'John',
         lastName: 'Doe',
@@ -526,11 +538,25 @@ export default {
   opacity: 0.5;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .sticky-top {
-    position: static;
-  }
+/* Payment badge styles */
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 25px;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 3px;
+  color: white;
+}
+
+.mtn-badge {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8C42 100%);
+}
+
+.airtel-badge {
+  background: linear-gradient(135deg, #E21836 0%, #FF4D6A 100%);
 }
 
 /* Form validation styles */
@@ -540,5 +566,18 @@ export default {
 
 .form-control:valid {
   border-color: #198754;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sticky-top {
+    position: static;
+  }
+  
+  .payment-badge {
+    width: 35px;
+    height: 22px;
+    font-size: 9px;
+  }
 }
 </style>
