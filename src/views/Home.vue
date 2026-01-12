@@ -18,7 +18,7 @@
       <div class="container">
         <div class="row align-items-center min-vh-100">
           
-          <!-- Hero Content -->
+          <!-- Hero Content -->]
           <div class="col-lg-6">
             <div class="hero-content">
               <div class="trust-badge mb-4">
@@ -331,6 +331,16 @@ import LeadershipCard from '@/components/common/LeadershipCard.vue'
 import TestimonialsCarousel from '@/components/common/TestimonialsCarousel.vue'
 import { apiService } from '@/services/api'
 
+// 🔧 FIX 1: Import images from src/assets instead of using public folder paths
+import heroImage1 from '@/assets/images/avc/hero-1.jpg'
+import heroImage2 from '@/assets/images/avc/hero-2.jpg'
+import heroImage3 from '@/assets/images/avc/hero-3.jpg'
+
+// 🔧 FIX 2: Import leadership images
+import hebertImage from '@/assets/images/leadership/hebert.png'
+import krammerImage from '@/assets/images/leadership/krammer.png'
+import angelaImage from '@/assets/images/leadership/angelaa.jpg'
+
 export default {
   name: 'HomeView',
   components: {
@@ -340,11 +350,11 @@ export default {
     TestimonialsCarousel
   },
   setup() {
-    // Hero Background Slideshow
+    // 🔧 FIX 3: Use imported images instead of public folder paths
     const heroImages = ref([
-      '/images/avc/hero-2.jpg',
-      '/images/avc/hero-3.jpg',
-      '/images/avc/hero-1.jpg',
+      heroImage2, // '/images/avc/hero-2.jpg'
+      heroImage3, // '/images/avc/hero-3.jpg'
+      heroImage1, // '/images/avc/hero-1.jpg'
     ])
     const currentSlide = ref(0)
 
@@ -429,14 +439,14 @@ export default {
     const eventsLoading = ref(false)
     const eventsError = ref(false)
 
-    // Leadership team data
+    // 🔧 FIX 4: Use imported leadership images
     const leadershipTeam = ref([
       {
         id: 1,
-        name: 'Mr.Muyomba Hebert',
+        name: 'Mr. Muyomba Hebert',
         position: 'Choir Director',
-        bio: 'With over 20+ years of experience in choral direction, Mr.Muyomba brings exceptional musical expertise and passion.',
-        avatar: '/images/leadership/hebert.png',
+        bio: 'With over 20+ years of experience in choral direction, Mr. Muyomba brings exceptional musical expertise and passion.',
+        avatar: hebertImage, // '/images/leadership/hebert.png'
         stats: {
           years: 15,
           concerts: 200,
@@ -453,7 +463,7 @@ export default {
         name: 'Matovu Peter Kammer',
         position: 'Assistant Director',
         bio: 'Specializing in vocal training and section development, Michael ensures every voice reaches its potential.',
-        avatar: '/images/leadership/krammer.png',
+        avatar: krammerImage, // '/images/leadership/krammer.png'
         stats: {
           years: 8,
           projects: 45,
@@ -469,7 +479,7 @@ export default {
         name: 'Nakirijja Angela',
         position: 'Music Coordinator',
         bio: 'Angela manages our extensive music library and coordinates all musical arrangements and performances.',
-        avatar: '/images/leadership/angelaa.jpg',
+        avatar: angelaImage, // '/images/leadership/angelaa.jpg'
         stats: {
           years: 6,
           pieces: 300,

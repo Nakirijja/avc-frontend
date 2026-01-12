@@ -14,7 +14,7 @@ resolve: {
     '@': resolve(__dirname, 'src'), 
   },
 },
-  base: '/avc-frontend/',
+  base: '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -31,5 +31,9 @@ resolve: {
         entryFileNames: 'assets/js/[name]-[hash].js',
       }
     }
+  },
+  server: {
+    port: 5173,
+    host: true
   }
 })
